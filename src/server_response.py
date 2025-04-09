@@ -1,5 +1,6 @@
 MAX_STR_PRINT_LENGTH = 30
 
+
 class ServerResponse:
     def __init__(self, response_data, prompt):
         self.prompt = prompt
@@ -8,7 +9,7 @@ class ServerResponse:
                 setattr(self, key, value)
             elif isinstance(value, int):
                 # All duration fields are using nanoseconds
-                if key.endswith('_duration'):
+                if key.endswith("_duration"):
                     value = value / 1e9
                 setattr(self, key, value)
 
@@ -20,6 +21,6 @@ class ServerResponse:
         attrs = []
         for key, value in vars(self).items():
             if isinstance(value, str) and len(value) > MAX_STR_PRINT_LENGTH:
-                value = value[:MAX_STR_PRINT_LENGTH] + '...'
+                value = value[:MAX_STR_PRINT_LENGTH] + "..."
             attrs.append(f"{key}={value}")
         return f"ServerResponse({', '.join(attrs)})"

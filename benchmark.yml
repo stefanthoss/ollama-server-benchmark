@@ -1,0 +1,6 @@
+models:
+  - gemma3:12b
+  - llama3.1:8b
+prompts:
+  - Why is the blue sky blue?
+  - Write an economic analysis about the US in the 1960s.

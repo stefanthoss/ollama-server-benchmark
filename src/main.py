@@ -140,7 +140,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num", default=1, type=int, help="Number of times to repeat the benchmark"
     )
-    parser.add_argument("--skip-unloading", action="store_true")
+    parser.add_argument(
+        "--skip-unloading",
+        action="store_true",
+        help="Skip unloading all running models on the server",
+    )
     args = parser.parse_args()
 
     main(

@@ -39,16 +39,16 @@ def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
         response = requests.get(f"{ollama_server}/api/tags")
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        LOGGER.error(f"Could not load model list from Ollama server", error=str(e))
+        LOGGER.error("Could not load model list from Ollama server", error=str(e))
         sys.exit(1)
     json_response = response.json()
-    local_models = [obj['name'] for obj in json_response["models"]]
+    local_models = [obj["name"] for obj in json_response["models"]]
     LOGGER.debug(f"Models available on Ollama server: {local_models}")
     for model in config["models"]:
         if model not in local_models:
             LOGGER.error(f"Did not find model {model} on Ollama server")
             sys.exit(1)
-    LOGGER.info(f"All configured models available on Ollama server")
+    LOGGER.info("All configured models available on Ollama server")
 
     # Unload all running models
     if not skip_unloading:
@@ -56,7 +56,7 @@ def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
             response = requests.get(f"{ollama_server}/api/ps")
             response.raise_for_status()
             json_response = response.json()
-            running_models = [obj['name'] for obj in json_response["models"]]
+            running_models = [obj["name"] for obj in json_response["models"]]
             if len(running_models) > 0:
                 LOGGER.debug(f"Models running on Ollama server: {running_models}")
                 for model in running_models:
@@ -64,11 +64,15 @@ def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
                         "model": model,
                         "keep_alive": 0,
                     }
-                    response = requests.post(f"{ollama_server}/api/generate", json=payload)
+                    response = requests.post(
+                        f"{ollama_server}/api/generate", json=payload
+                    )
                     response.raise_for_status()
             LOGGER.info("No models running on Ollama server")
         except requests.exceptions.RequestException as e:
-            LOGGER.error(f"Could not unload running models from Ollama server", error=str(e))
+            LOGGER.error(
+                "Could not unload running models from Ollama server", error=str(e)
+            )
             sys.exit(1)
 
     result_cols = [
@@ -136,7 +140,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num", default=1, type=int, help="Number of times to repeat the benchmark"
     )
-    parser.add_argument('--skip-unloading', action='store_true')
+    parser.add_argument("--skip-unloading", action="store_true")
     args = parser.parse_args()
 
-    main(args.ollama_server, args.config_file, args.output_csv, args.num, args.skip_unloading)
+    main(
+        args.ollama_server,
+        args.config_file,
+        args.output_csv,
+        args.num,
+        args.skip_unloading,
+    )

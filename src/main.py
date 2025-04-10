@@ -13,7 +13,13 @@ from server_response import ServerResponse
 LOGGER = structlog.get_logger()
 
 
-def main(server: OllamaServer, config_file: str, output_csv: str, benchmark_num: int, skip_unloading: bool):
+def main(
+    server: OllamaServer,
+    config_file: str,
+    output_csv: str,
+    benchmark_num: int,
+    skip_unloading: bool,
+):
     with open(config_file, "r") as f:
         config = yaml.safe_load(f)
 

@@ -15,16 +15,20 @@ class OllamaServer:
             response.raise_for_status()
             return response.json()["version"]
         except requests.exceptions.RequestException as e:
-            self.logger.error("Error occurred while connecting to Ollama server", error=str(e))
+            self.logger.error(
+                "Error occurred while connecting to Ollama server", error=str(e)
+            )
             sys.exit(1)
 
     def get_models(self) -> List[str]:
         try:
             response = requests.get(f"{self.address}/api/tags")
             response.raise_for_status()
-            return [obj['name'] for obj in response.json()["models"]]
+            return [obj["name"] for obj in response.json()["models"]]
         except requests.exceptions.RequestException as e:
-            self.logger.error("Could not load model list from Ollama server", error=str(e))
+            self.logger.error(
+                "Could not load model list from Ollama server", error=str(e)
+            )
             sys.exit(1)
 
     def unload_models(self):
@@ -34,7 +38,9 @@ class OllamaServer:
             json_response = response.json()
             running_models = [obj["name"] for obj in json_response["models"]]
             if len(running_models) > 0:
-                self.logger.debug(f"Stopping these models on Ollama server: {running_models}")
+                self.logger.debug(
+                    f"Stopping these models on Ollama server: {running_models}"
+                )
                 for model in running_models:
                     payload = {
                         "model": model,

@@ -7,42 +7,35 @@ import requests
 import structlog
 import yaml
 
+from ollama_server import OllamaServer
 from server_response import ServerResponse
 
 LOGGER = structlog.get_logger()
 
 
-def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
+def main(
+    server: OllamaServer,
+    config_file: str,
+    output_csv: str,
+    benchmark_num: int,
+    skip_unloading: bool,
+):
     with open(config_file, "r") as f:
         config = yaml.safe_load(f)
 
     if (
         not all(key in config for key in ["models", "prompts"])
-        or len(config["models"]) < 1
-        or len(config["prompts"]) < 1
+        or not config["models"]
+        or not config["prompts"]
     ):
         raise ValueError(
             "Config YAML file must contain at least one model and one prompt"
         )
 
-    # Check Ollama server version
-    try:
-        response = requests.get(f"{ollama_server}/api/version")
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        LOGGER.error("Error occurred while connecting to Ollama server", error=str(e))
-        sys.exit(1)
-    LOGGER.info(f"Ollama server version: {response.json()['version']}")
+    LOGGER.info(f"Ollama server version: {server.get_version()}")
 
     # Check that all models exist on server
-    try:
-        response = requests.get(f"{ollama_server}/api/tags")
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        LOGGER.error("Could not load model list from Ollama server", error=str(e))
-        sys.exit(1)
-    json_response = response.json()
-    local_models = [obj["name"] for obj in json_response["models"]]
+    local_models = server.get_models()
     LOGGER.debug(f"Models available on Ollama server: {local_models}")
     for model in config["models"]:
         if model not in local_models:
@@ -50,30 +43,8 @@ def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
             sys.exit(1)
     LOGGER.info("All configured models available on Ollama server")
 
-    # Unload all running models
     if not skip_unloading:
-        try:
-            response = requests.get(f"{ollama_server}/api/ps")
-            response.raise_for_status()
-            json_response = response.json()
-            running_models = [obj["name"] for obj in json_response["models"]]
-            if len(running_models) > 0:
-                LOGGER.debug(f"Models running on Ollama server: {running_models}")
-                for model in running_models:
-                    payload = {
-                        "model": model,
-                        "keep_alive": 0,
-                    }
-                    response = requests.post(
-                        f"{ollama_server}/api/generate", json=payload
-                    )
-                    response.raise_for_status()
-            LOGGER.info("No models running on Ollama server")
-        except requests.exceptions.RequestException as e:
-            LOGGER.error(
-                "Could not unload running models from Ollama server", error=str(e)
-            )
-            sys.exit(1)
+        server.unload_models()
 
     result_cols = [
         "model",
@@ -87,6 +58,7 @@ def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
     results = [result_cols]
 
     # Request prompts
+    LOGGER.info("Starting benchmark")
     for n, model, prompt in product(
         range(benchmark_num), config["models"], config["prompts"]
     ):
@@ -97,7 +69,7 @@ def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
                 "stream": False,
                 "keep_alive": 0,
             }
-            response = requests.post(f"{ollama_server}/api/generate", json=payload)
+            response = requests.post(f"{server.address}/api/generate", json=payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             LOGGER.error(
@@ -110,7 +82,7 @@ def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
             json_response = response.json()
             response_obj = ServerResponse(json_response, prompt)
             LOGGER.debug(
-                f"Run {(n + 1)}: Received response from {response_obj.model} in {response_obj.total_duration}s ({response_obj.eval_rate} tokens/s)."
+                f"Run {(n + 1)}: Received response from {response_obj.model} in {response_obj.total_duration}s ({response_obj.eval_rate} tokens/s)"
             )
         except (ValueError, KeyError) as e:
             LOGGER.error("Cannot parse response from Ollama server", error=str(e))
@@ -147,10 +119,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    server = OllamaServer(args.server, LOGGER)
+
     main(
-        args.ollama_server,
-        args.config_file,
-        args.output_csv,
+        server,
+        args.config,
+        args.output,
         args.num,
         args.skip_unloading,
     )

@@ -4,8 +4,8 @@ Python script for evaluating the performance of Ollama servers using the Ollama 
 ## Usage
 
 ```shell
-uv run src/main.py -h
-uv run src/main.py -c benchmark.yml -o results.csv -s http://ollama.example.com:11434
+uv run src/main.py --help
+uv run src/main.py --config benchmark.yml --output results.csv --server http://ollama.example.com:11434 --num 1
 ```
 
 ## Development

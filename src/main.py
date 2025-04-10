@@ -12,7 +12,7 @@ from server_response import ServerResponse
 LOGGER = structlog.get_logger()
 
 
-def main(ollama_server, config_file, output_csv, skip_unloading):
+def main(ollama_server, config_file, output_csv, benchmark_num, skip_unloading):
     with open(config_file, "r") as f:
         config = yaml.safe_load(f)
 
@@ -83,7 +83,9 @@ def main(ollama_server, config_file, output_csv, skip_unloading):
     results = [result_cols]
 
     # Request prompts
-    for model, prompt in product(config["models"], config["prompts"]):
+    for n, model, prompt in product(
+        range(benchmark_num), config["models"], config["prompts"]
+    ):
         try:
             payload = {
                 "model": model,
@@ -104,7 +106,7 @@ def main(ollama_server, config_file, output_csv, skip_unloading):
             json_response = response.json()
             response_obj = ServerResponse(json_response, prompt)
             LOGGER.debug(
-                f"Received response from {response_obj.model} in {response_obj.total_duration}s ({response_obj.eval_rate} tokens/s)."
+                f"Run {(n + 1)}: Received response from {response_obj.model} in {response_obj.total_duration}s ({response_obj.eval_rate} tokens/s)."
             )
         except (ValueError, KeyError) as e:
             LOGGER.error("Cannot parse response from Ollama server", error=str(e))
@@ -124,16 +126,17 @@ if __name__ == "__main__":
         description="Python script for evaluating the performance of Ollama servers",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    parser.add_argument("--server", required=True, help="Ollama server HTTP address")
     parser.add_argument(
-        "-s", "--ollama_server", required=True, help="Ollama server HTTP address"
+        "--config", default="benchmark.yml", help="Path to config YAML file"
     )
     parser.add_argument(
-        "-c", "--config_file", default="benchmark.yml", help="Path to config YAML file"
+        "--output", default="results.csv", help="Path to output CSV file"
     )
     parser.add_argument(
-        "-o", "--output_csv", default="results.csv", help="Path to output CSV file"
+        "--num", default=1, type=int, help="Number of times to repeat the benchmark"
     )
     parser.add_argument('--skip-unloading', action='store_true')
     args = parser.parse_args()
 
-    main(args.ollama_server, args.config_file, args.output_csv,  args.skip_unloading)
+    main(args.ollama_server, args.config_file, args.output_csv, args.num, args.skip_unloading)

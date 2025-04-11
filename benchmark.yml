@@ -2,7 +2,7 @@ models:
   - deepseek-r1:14b
   - gemma3:12b
   - llama3.1:8b
-  - mistral-small:22b
+  - mistral-nemo:12b
 prompts:
   - Explain the cultural significance of the "Dia de los Muertos" in Mexico.
   - What is the "categorical imperative"? Explain why Kant believes it is a fundamental principle of morality.

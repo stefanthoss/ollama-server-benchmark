@@ -3,12 +3,10 @@ import csv
 import sys
 from itertools import product
 
-import requests
 import structlog
 import yaml
 
 from ollama_server import OllamaServer
-from server_response import ServerResponse
 
 LOGGER = structlog.get_logger()
 
@@ -62,31 +60,10 @@ def main(
     for n, model, prompt in product(
         range(benchmark_num), config["models"], config["prompts"]
     ):
-        try:
-            payload = {
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                "keep_alive": 0,
-            }
-            response = requests.post(f"{server.address}/api/generate", json=payload)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            LOGGER.error(
-                "Error occurred while sending prompt request to Ollama server",
-                error=str(e),
-            )
-            sys.exit(1)
-
-        try:
-            json_response = response.json()
-            response_obj = ServerResponse(json_response, prompt)
-            LOGGER.debug(
-                f"Run {(n + 1)}: Received response from {response_obj.model} in {response_obj.total_duration}s ({response_obj.eval_rate} tokens/s)"
-            )
-        except (ValueError, KeyError) as e:
-            LOGGER.error("Cannot parse response from Ollama server", error=str(e))
-            sys.exit(1)
+        response_obj = server.generate_response(model, prompt)
+        LOGGER.debug(
+            f"Run {(n + 1)}: Received response from {response_obj.model} in {response_obj.total_duration}s ({response_obj.eval_rate} tokens/s)"
+        )
 
         result = [getattr(response_obj, key) for key in result_cols]
         results.append(result)

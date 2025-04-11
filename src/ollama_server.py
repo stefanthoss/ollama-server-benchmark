@@ -3,6 +3,8 @@ from typing import List
 
 import requests
 
+from server_response import ServerResponse
+
 
 class OllamaServer:
     def __init__(self, address, logger):
@@ -55,4 +57,25 @@ class OllamaServer:
             self.logger.error(
                 "Could not unload running models from Ollama server", error=str(e)
             )
+            sys.exit(1)
+
+    def generate_response(self, model: str, prompt: str) -> ServerResponse:
+        try:
+            payload = {
+                "model": model,
+                "prompt": prompt,
+                "stream": False,
+                "keep_alive": 0,
+            }
+            response = requests.post(f"{self.address}/api/generate", json=payload)
+            response.raise_for_status()
+            return ServerResponse(response.json(), prompt)
+        except requests.exceptions.RequestException as e:
+            self.logger.error(
+                "Error occurred while sending prompt request to Ollama server",
+                error=str(e),
+            )
+            sys.exit(1)
+        except (ValueError, KeyError) as e:
+            self.logger.error("Cannot parse response from Ollama server", error=str(e))
             sys.exit(1)

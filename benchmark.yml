@@ -1,6 +1,11 @@
 models:
+  - deepseek-r1:14b
   - gemma3:12b
   - llama3.1:8b
+  - mistral-small:22b
 prompts:
-  - Why is the blue sky blue?
+  - Explain the cultural significance of the "Dia de los Muertos" in Mexico.
+  - What is the "categorical imperative"? Explain why Kant believes it is a fundamental principle of morality.
+  - What is the difference in meaning between "affect" and "effect"?
+  - Write a recipe for a classic apple pie.
   - Write an economic analysis about the US in the 1960s.

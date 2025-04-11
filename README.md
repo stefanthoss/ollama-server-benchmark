@@ -1,6 +1,6 @@
 # Ollama Server Benchmark
 
-This Python script can be used to benchmark an Ollama server by sending prompts to different models and measuring various metrics such as duration and token/s. The results are then written to a CSV file for further analysis of the server's performance.
+This Python script can be used to benchmark an Ollama server by sending prompts to different models and measuring various metrics such as duration and token/s. The results are then written to a CSV file for further analysis of the server's performance. The actual response of the model is not evaluated.
 
 The script connects to the Ollama server through the REST API. This allows it to be executed remotely from a different machine, as long as there's network access to the Ollama server. No direct access to the Ollama server itself is required for running this script.
 
@@ -14,7 +14,7 @@ Use the `--help` argument for usage instructions.
 
 ```shell
 uv run src/main.py --help
-uv run src/main.py --config benchmark.yml --output results.csv --server http://ollama.example.com:11434 --num 1
+uv run src/main.py --server http://ollama.example.com:11434
 
 # Or when using Python 3 directly instead of uv:
 python src/main.py --help

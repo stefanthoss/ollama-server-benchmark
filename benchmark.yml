@@ -4,8 +4,7 @@ models:
   - llama3.1:8b
   - mistral-nemo:12b
 prompts:
-  - Explain the cultural significance of the "Dia de los Muertos" in Mexico.
-  - What is the "categorical imperative"? Explain why Kant believes it is a fundamental principle of morality.
-  - What is the difference in meaning between "affect" and "effect"?
-  - Write a recipe for a classic apple pie.
+  - Please provide a recipe for a traditional apple pie.
+  - What is the 'categorical imperative'? Explain why Kant believes it is a fundamental principle of morality.
+  - What is the difference in meaning between 'affect' and 'effect'?
   - Write an economic analysis about the US in the 1960s.

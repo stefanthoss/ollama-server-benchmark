@@ -52,6 +52,8 @@ def main(
         "load_duration",
         "eval_duration",
         "eval_rate",
+        "prompt_eval_duration",
+        "prompt_eval_rate",
     ]
     results = [result_cols]
 

@@ -24,7 +24,17 @@ In this repository, a sample `benchmark.yml` is provided. You can adjust this fi
 
 ## Output Format
 
-CSV file with the headers model, prompt, created_at, total_duration, load_duration, eval_duration, and eval_rate.
+CSV file with the following headers:
+
+* model
+* prompt
+* created_at: Datetime of the response generation
+* total_duration: Time spent generating the response (in seconds)
+* load_duration: Time spent loading the model (in seconds)
+* eval_duration: Time spent generating the response (in seconds)
+* eval_rate: Response token/s
+* prompt_eval_duration: Time spent evaluating the prompt (in seconds)
+* prompt_eval_rate: Prompt token/s
 
 ## Development
 

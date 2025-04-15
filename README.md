@@ -36,6 +36,12 @@ CSV file with the following headers:
 * prompt_eval_duration: Time spent evaluating the prompt (in seconds)
 * prompt_eval_rate: Prompt token/s
 
+## Analysis
+
+I also created a [Jupyter Notebook for some basic analysis](analysis/benchmark-analysis.ipynb) of the resulting CSV files if you want to compare multiple benchmarks. Here's an example comparison of token/s for my Ollama server using a Tesla T4 GPU and CPU-only:
+
+![Token/s comparison graph](analysis/eval-rate-graph.png)
+
 ## Development
 
 ```shell
